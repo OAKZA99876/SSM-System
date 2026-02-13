@@ -225,7 +225,7 @@ def render_termination(df):
 
 def render_search_calc(df):
     st.header("🔍 Search & Calculator")
-    t1, t2 = st.tabs(["Search Member", "Quick Fee Calc"])   
+    t1, t2 = st.tabs(["Search Member", "Fee Calculator"])   
     with t1:
         s_id = st.text_input("Search by ID Card", placeholder="Enter ID Card...")
         if s_id:
