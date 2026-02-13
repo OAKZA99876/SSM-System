@@ -1,4 +1,0 @@
-streamlit
-pandas
-xlsxwriter
-streamlit-option-menu
