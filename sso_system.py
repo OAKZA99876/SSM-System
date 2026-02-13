@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import xlsxwriter
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from streamlit_option_menu import option_menu
 
@@ -303,7 +303,7 @@ def render_export(df):
     st.download_button(
         label="📥 Download Excel Report",
         data=output.getvalue(),
-        file_name=f"SSM_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+        filename = f"SSM_Report_{(datetime.utcnow() + timedelta(hours=7)).strftime('%Y%m%d_%H%M%S')}.xlsx"
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         type="primary"
     )
