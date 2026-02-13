@@ -260,25 +260,52 @@ def render_search_calc(df):
 
 def render_export(df):
     st.header("📤 Export Data")
-    if df.empty: return st.info("No data.")
-    out = df.rename(columns={'Member_ID':'ID', 'Insurance':'SS Fee', 'Remaining':'Balance'})
-    out = out[['ID', 'Name', 'ID_Card', 'Gender', 'Phone', 'Hospital', 'Salary', 'SS Fee', 'Balance', 'Join_Date', 'Last_Update']] 
+    if df.empty:
+        st.info("No data to export.")
+        return
+    all_rows = df.to_dict('records')
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        wb, ws = writer.book, writer.book.add_worksheet('Report')
-        fmt = lambda x: wb.add_format({'border':1, 'valign':'vcenter', **x})
-        head_fmt = fmt({'bold':True, 'bg_color':'#4472C4', 'font_color':'white', 'align':'center'})
-        num_fmt  = fmt({'num_format':'#,##0.00'})
-        tot_lbl  = fmt({'bold':True, 'bg_color':'#4472C4', 'font_color':'white', 'align':'right'})
-        tot_val  = fmt({'bold':True, 'bg_color':'#D9D9D9', 'num_format':'#,##0.00'})
-        ws.set_column('A:K', 18)
-        for c, h in enumerate(out.columns): ws.write(0, c, h, head_fmt)      
-        for r, row in enumerate(out.values, 1):
-            for c, val in enumerate(row):
-                ws.write(r, c, val, num_fmt if c in [6,7,8] else fmt({}))
-        last = len(out) + 1
-        ws.write(last, 6, "TOTAL", tot_lbl)
-        ws.write(last, 7, out['SS Fee'].sum(), tot_val)
-    st.download_button("Download Excel", output.getvalue(), f"Report_{datetime.now():%Y%m%d-%H:%M:%S}.xlsx", type="primary")
+    wb = xlsxwriter.Workbook(output, {'in_memory': True})
+    ws = wb.add_worksheet("SSM Data")
+    fmt = {
+        'head': wb.add_format({'bold': 1, 'bg_color': '#4472C4', 'color': 'white', 'border': 1, 'align': 'center', 'valign': 'vcenter'}),
+        'text': wb.add_format({'border': 1, 'align': 'left', 'valign': 'vcenter'}),
+        'cent': wb.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter'}),
+        'num': wb.add_format({'num_format': '#,##0.00', 'border': 1, 'valign': 'vcenter'}),
+        'sum': wb.add_format({'bold': 1, 'bg_color': '#D9D9D9', 'border': 1, 'num_format': '#,##0.00', 'valign': 'vcenter'})
+    }
+    headers = ['ID', 'Name', 'ID Card', 'Gender', 'Phone', 'Hospital', 'Salary', 'SS Fee', 'Balance', 'Join Date', 'Last Update']
+    widths = [10, 25, 18, 10, 15, 20, 15, 12, 15, 13, 20]
+    for i, (h, w) in enumerate(zip(headers, widths)):
+        ws.write(0, i, h, fmt['head'])
+        ws.set_column(i, i, w)
+    for r, row in enumerate(all_rows, 1):
+        to_num = lambda k: float(str(row.get(k, 0)).replace(',', '')) if row.get(k) else 0.0
+        data = [
+            (row['Member_ID'], fmt['cent']),
+            (row['Name'], fmt['text']),
+            (str(row['ID_Card']).replace("'", ""), fmt['cent']),
+            (row['Gender'], fmt['cent']),
+            (str(row['Phone']).replace("'", ""), fmt['cent']),
+            (row['Hospital'], fmt['text']),
+            (to_num('Salary'), fmt['num']),
+            (to_num('Insurance'), fmt['num']),
+            (to_num('Remaining'), fmt['num']),
+            (str(row.get('Join_Date', '-')), fmt['cent']),
+            (str(row.get('Last_Update', '-')), fmt['cent'])
+        ]
+        for c, (val, f) in enumerate(data):
+            ws.write(r, c, val, f)
+    last_row = len(all_rows) + 1
+    ws.write(last_row, 6, "TOTAL", fmt['head'])
+    ws.write_formula(last_row, 7, f"=SUM(H2:H{last_row})", fmt['sum'])
+    wb.close()
+    st.download_button(
+        label="📥 Download Excel Report",
+        data=output.getvalue(),
+        file_name=f"SSM_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type="primary"
+    )
 if __name__ == "__main__":
     main()
