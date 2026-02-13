@@ -305,9 +305,9 @@ def render_export(df):
     st.download_button(
         label="📥 Download Excel Report",
         data=output.getvalue(),
-        file_name=filename,  # ใส่ชื่อตัวแปรตรงนี้
+        file_name=filename,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         type="primary"
-    ))
+    )
 if __name__ == "__main__":
     main()
