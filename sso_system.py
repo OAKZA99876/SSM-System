@@ -10,7 +10,7 @@ MASTER_FILE = 'SSMember.csv'
 st.set_page_config(page_title="SSM System", layout="wide", page_icon="🏥")
 
 def calculate_insurance(salary):
-    base_salary = max(1650, min(salary, 15000))
+    base_salary = max(1650, min(salary, 17500))
     insurance = base_salary * 0.05
     remaining = salary - insurance
     return insurance, remaining
@@ -300,12 +300,14 @@ def render_export(df):
     ws.write(last_row, 6, "TOTAL", fmt['head'])
     ws.write_formula(last_row, 7, f"=SUM(H2:H{last_row})", fmt['sum'])
     wb.close()
+    th_time = datetime.utcnow() + timedelta(hours=7)
+    filename = f"SSM_Report_{th_time.strftime('%Y%m%d_%H%M%S')}.xlsx"
     st.download_button(
         label="📥 Download Excel Report",
         data=output.getvalue(),
-        filename = f"SSM_Report_{(datetime.utcnow() + timedelta(hours=7)).strftime('%Y%m%d_%H%M%S')}.xlsx"
+        file_name=filename,  # ใส่ชื่อตัวแปรตรงนี้
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         type="primary"
-    )
+    ))
 if __name__ == "__main__":
     main()
