@@ -107,8 +107,6 @@ def render_dashboard(df):
             
         st.markdown("---")
         st.subheader("📋 Member List")
-        
-        # Formatted Dataframe (สวยกว่า st.table)
         st.dataframe(
             df,
             use_container_width=True,
@@ -295,7 +293,7 @@ def render_export(df):
     th_time = datetime.utcnow() + timedelta(hours=7)
     filename = f"SSM_Report_{th_time.strftime('%Y%m%d_%H%M%S')}.xlsx"
     st.download_button(
-        label="📥 Download Excel Report",
+        label="Download Excel Report",
         data=output.getvalue(),
         file_name=filename,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
