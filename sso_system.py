@@ -89,15 +89,11 @@ def main():
 def render_dashboard(df):
     st.header("📊 Overview Dashboard")
     if not df.empty:
-        # Metrics Row
         col_m1, col_m2, col_m3 = st.columns(3)
         col_m1.metric("👥 Total Members", f"{len(df):,} Person")
         col_m2.metric("💰 Total SS Fee", f"{df['Insurance'].sum():,.2f} THB")
         col_m3.metric("💵 Avg Salary", f"{df['Salary'].mean():,.2f} THB")
-        
-        st.markdown("---")
-        
-        # Charts Row
+        st.markdown("---")        
         col_c1, col_c2 = st.columns([2, 1])
         with col_c1:
             st.subheader("🏥 Hospital Distribution")
@@ -159,7 +155,7 @@ def render_register(df):
                     'Member_ID': new_id, 'Name': name, 'ID_Card': id_card,
                     'Gender': gender, 'Phone': phone, 'Hospital': hospital,
                     'Salary': salary, 'Insurance': ins, 'Remaining': rem,
-                    'Join_Date': datetime.now().strftime("%Y-%m-%d"),
+                    'Join_Date': (datetime.utcnow() + timedelta(hours=7)).strftime("%Y-%m-%d"),
                     'Last_Update': "-"
                 }
                 df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
@@ -179,17 +175,13 @@ def render_edit(df):
     
     with st.form("edit_form"):
         col1, col2 = st.columns(2)
-        # เพิ่มช่องแก้ไข ID Card
         new_id_card = col1.text_input("ID Card", value=row['ID_Card'], max_chars=13)
-        new_name = col2.text_input("Name", value=row['Name'])
-        
+        new_name = col2.text_input("Name", value=row['Name'])        
         new_hos = col1.text_input("Hospital", value=row['Hospital'])
-        new_phone = col2.text_input("Phone", value=row['Phone'])
-        
+        new_phone = col2.text_input("Phone", value=row['Phone'])        
         new_sal = st.number_input("Salary", value=float(row['Salary']))
         
         if st.form_submit_button("Save Changes"):
-            # ตรวจสอบว่า ID Card ถูกต้องและไม่ซ้ำ (ถ้ามีการเปลี่ยน)
             if len(new_id_card) != 13 or not new_id_card.isdigit():
                 st.error("Invalid ID Card format")
             elif new_id_card != row['ID_Card'] and df['ID_Card'].isin([new_id_card]).any():
@@ -203,7 +195,7 @@ def render_edit(df):
                 df.at[idx, 'Phone'] = new_phone
                 df.at[idx, 'Insurance'] = ins
                 df.at[idx, 'Remaining'] = rem
-                df.at[idx, 'Last_Update'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                df.at[idx, 'Last_Update'] = (datetime.utcnow() + timedelta(hours=7)).strftime("%Y-%m-%d %H:%M:%S")
                 save_data(df)
                 st.success("Information updated!")
                 st.rerun()
